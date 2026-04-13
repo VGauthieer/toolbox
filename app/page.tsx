@@ -1,65 +1,151 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useCallback } from "react";
+import ScriptPanel from "./components/ScriptPanel";
+import type { Script } from "./components/ScriptPanel";
+import ScanStatus from "./components/ScanStatus";
+import type { ScanResult } from "./components/ScanStatus";
+import ScanHistory from "./components/ScanHistory";
+import TargetModal from "./components/TargetModal";
+import { saveScan } from "./lib/scan-storage";
 
 export default function Home() {
+  const [currentScan, setCurrentScan] = useState<ScanResult | null>(null);
+  const [scanHistory, setScanHistory] = useState<ScanResult[]>([]);
+  const [selectedScript, setSelectedScript] = useState<Script | null>(null);
+
+  const isScanning = currentScan?.status === "running";
+
+  const handleLaunchScript = useCallback((script: Script) => {
+    setSelectedScript(script);
+  }, []);
+
+  const handleConfirmLaunch = useCallback(
+    (target: string) => {
+      if (!selectedScript) return;
+
+      const scan: ScanResult = {
+        id: `scan-${Date.now()}`,
+        script: selectedScript,
+        target,
+        startTime: new Date(),
+        status: "running",
+        progress: 0,
+        findings: [],
+      };
+
+      setCurrentScan(scan);
+      setSelectedScript(null);
+    },
+    [selectedScript]
+  );
+
+  const handleScanComplete = useCallback((completedScan: ScanResult, logs: string[]) => {
+    setCurrentScan(completedScan);
+    setScanHistory((prev) => [...prev, completedScan]);
+    saveScan(completedScan, logs);
+  }, []);
+
+  const handleCancelScan = useCallback(() => {
+    if (currentScan) {
+      const cancelled: ScanResult = {
+        ...currentScan,
+        status: "failed",
+        endTime: new Date(),
+        findings: [],
+      };
+      setCurrentScan(cancelled);
+      setScanHistory((prev) => [...prev, cancelled]);
+    }
+  }, [currentScan]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col h-screen overflow-hidden">
+      {/* Top bar */}
+      <header className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-md z-10">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--accent)] to-[#00aa55] flex items-center justify-center shadow-lg shadow-[var(--accent)]/20">
+            <span className="text-black text-sm font-bold">H</span>
+          </div>
+          <div>
+            <h1 className="text-sm font-bold text-[var(--text-primary)] tracking-wide">
+              HIMALIA
+            </h1>
+            <p className="text-[10px] text-[var(--text-muted)] font-mono tracking-wider">
+              OFFENSIVE SECURITY TOOLBOX
+            </p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        <div className="flex items-center gap-4">
+          {/* Status indicator */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--surface-2)] border border-[var(--border)]">
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${isScanning
+                ? "bg-[var(--accent)] animate-pulse"
+                : "bg-[var(--text-muted)]"
+                }`}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <span className="text-[10px] font-mono text-[var(--text-secondary)]">
+              {isScanning ? "SCANNING" : "IDLE"}
+            </span>
+          </div>
+
+          {/* Scan count */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--surface-2)] border border-[var(--border)]">
+            <svg
+              className="w-3 h-3 text-[var(--text-muted)]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
+            </svg>
+            <span className="text-[10px] font-mono text-[var(--text-secondary)]">
+              {scanHistory.length} SCANS
+            </span>
+          </div>
         </div>
+      </header>
+
+      {/* Main 3-panel layout */}
+      <main className="flex flex-1 min-h-0">
+        {/* Left panel — Scripts */}
+        <aside className="w-[300px] shrink-0 border-r border-[var(--border)] bg-[var(--surface)] overflow-hidden">
+          <ScriptPanel
+            onLaunchScript={handleLaunchScript}
+            isScanning={isScanning}
+          />
+        </aside>
+
+        {/* Center panel — Scan Status */}
+        <section className="flex-1 min-w-0 bg-[var(--background)] overflow-hidden">
+          <ScanStatus
+            currentScan={currentScan}
+            onScanComplete={handleScanComplete}
+            onCancel={handleCancelScan}
+          />
+        </section>
+
+        {/* Right panel — History */}
+        <aside className="w-[320px] shrink-0 border-l border-[var(--border)] bg-[var(--surface)] overflow-hidden">
+          <ScanHistory history={scanHistory} />
+        </aside>
       </main>
+
+      {/* Target input modal */}
+      {selectedScript && (
+        <TargetModal
+          script={selectedScript}
+          onConfirm={handleConfirmLaunch}
+          onCancel={() => setSelectedScript(null)}
+        />
+      )}
     </div>
   );
 }
