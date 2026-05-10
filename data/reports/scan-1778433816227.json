@@ -1,0 +1,14 @@
+{
+  "id": "scan-1778433816227",
+  "scriptName": "Nmap Full Scan",
+  "scriptIcon": "🔍",
+  "scriptCategory": "Reconnaissance",
+  "target": "192.168.1.1/24",
+  "status": "completed",
+  "startTime": "2026-05-10T17:23:36.227Z",
+  "endTime": "2026-05-10T17:23:36.406Z",
+  "findings": [],
+  "logs": [
+    "/bin/sh: 1: nmap: not found"
+  ]
+}

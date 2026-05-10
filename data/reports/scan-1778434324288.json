@@ -1,0 +1,18 @@
+{
+  "id": "scan-1778434324288",
+  "scriptName": "Nikto Web Scan",
+  "scriptIcon": "🕷️",
+  "scriptCategory": "Vulnérabilités",
+  "target": "192.168.1.1",
+  "status": "completed",
+  "startTime": "2026-05-10T17:32:04.288Z",
+  "endTime": "2026-05-10T17:32:04.607Z",
+  "findings": [],
+  "logs": [
+    "- Nikto v2.1.5",
+    "---------------------------------------------------------------------------",
+    "+ No web server found on livebox.home:80",
+    "---------------------------------------------------------------------------",
+    "+ 0 host(s) tested"
+  ]
+}

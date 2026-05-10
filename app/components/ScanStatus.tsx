@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import type { Script } from "./ScriptPanel";
-import { log } from "console";
 
 export interface ScanResult {
   id: string;
@@ -35,6 +34,7 @@ export default function ScanStatus({
   const [logs, setLogs] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const logsRef = useRef<string[]>([]);
 
   useEffect(() => {
     if (!currentScan || currentScan.status !== "running") return;
@@ -63,7 +63,12 @@ export default function ScanStatus({
           const lines = linebuffer.split("\n");
           linebuffer = lines.pop() ?? "";
 
-          setLogs((prev) => [...prev, ...lines.filter(Boolean)]);
+          const newLines = lines.filter(Boolean);
+          setLogs((prev) => {
+            const updated = [...prev, ...newLines];
+            logsRef.current = updated;
+            return updated;
+          });
 
           setProgress((prev) => Math.min(prev + 2, 95));
         }
@@ -75,17 +80,21 @@ export default function ScanStatus({
           endTime: new Date(),
           progress: 100,
           findings: [],
-        }, logs);
+        }, logsRef.current);
 
       } catch (err) {
-        setLogs((prev) => [...prev, 'Erreur :${err}']);
+        setLogs((prev) => {
+          const updated = [...prev, `Erreur : ${err}`];
+          logsRef.current = updated;
+          return updated;
+        });
         onScanComplete({
           ...currentScan,
           status: "failed",
           endTime: new Date(),
           progress: 0,
           findings: []
-        }, logs);
+        }, logsRef.current);
       }
     };
 

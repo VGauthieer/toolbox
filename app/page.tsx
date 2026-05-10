@@ -1,20 +1,29 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import ScriptPanel from "./components/ScriptPanel";
 import type { Script } from "./components/ScriptPanel";
 import ScanStatus from "./components/ScanStatus";
 import type { ScanResult } from "./components/ScanStatus";
 import ScanHistory from "./components/ScanHistory";
 import TargetModal from "./components/TargetModal";
-import { saveScan } from "./lib/scan-storage";
+import { saveScan, loadAllScans } from "./lib/scan-storage";
 
 export default function Home() {
   const [currentScan, setCurrentScan] = useState<ScanResult | null>(null);
   const [scanHistory, setScanHistory] = useState<ScanResult[]>([]);
   const [selectedScript, setSelectedScript] = useState<Script | null>(null);
 
+  const [isLoading, setIsLoading] = useState(true);
   const isScanning = currentScan?.status === "running";
+
+  // Load persisted scan history on mount
+  useEffect(() => {
+    loadAllScans()
+      .then((scans) => setScanHistory(scans))
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const handleLaunchScript = useCallback((script: Script) => {
     setSelectedScript(script);
@@ -40,10 +49,10 @@ export default function Home() {
     [selectedScript]
   );
 
-  const handleScanComplete = useCallback((completedScan: ScanResult, logs: string[]) => {
+  const handleScanComplete = useCallback(async (completedScan: ScanResult, logs: string[]) => {
     setCurrentScan(completedScan);
     setScanHistory((prev) => [...prev, completedScan]);
-    saveScan(completedScan, logs);
+    await saveScan(completedScan, logs);
   }, []);
 
   const handleCancelScan = useCallback(() => {

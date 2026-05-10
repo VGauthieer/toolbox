@@ -7,6 +7,7 @@ const nmapFull: Script = {
   category: "Reconnaissance",
   risk: "low",
   icon: "🔍",
+  command: (target: string) => `nmap -A -T4 ${target}`,
 };
 
 export default nmapFull;
