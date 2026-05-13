@@ -1,3 +1,10 @@
+export interface ScriptOption {
+  id: string;
+  label: string;
+  choices: { value: string; label: string }[];
+  default: string;
+}
+
 export interface Script {
   id: string;
   name: string;
@@ -5,7 +12,8 @@ export interface Script {
   category: string;
   risk: "low" | "medium" | "high";
   icon: string;
-  command: (target: string) => string;
+  options?: ScriptOption[];
+  command: (target: string, options?: Record<string, string>) => string;
 }
 
 export interface ScriptCategory {

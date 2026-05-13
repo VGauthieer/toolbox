@@ -7,6 +7,7 @@ const arpScan: Script = {
   category: "Réseau",
   risk: "low",
   icon: "📡",
+  command: (target: string) => `arp-scan --localnet`
 };
 
 export default arpScan;

@@ -7,6 +7,7 @@ export interface ScanResult {
   id: string;
   script: Script;
   target: string;
+  scriptOptions?: Record<string, string>;
   startTime: Date;
   endTime?: Date;
   status: "running" | "completed" | "failed";
@@ -47,7 +48,7 @@ export default function ScanStatus({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            command: currentScan.script.command(currentScan.target),
+            command: currentScan.script.command(currentScan.target, currentScan.scriptOptions),
           }),
         });
 

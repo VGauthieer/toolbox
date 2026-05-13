@@ -5,7 +5,7 @@ import type { Script } from "./ScriptPanel";
 
 interface TargetModalProps {
   script: Script;
-  onConfirm: (target: string) => void;
+  onConfirm: (target: string, options?: Record<string, string>) => void;
   onCancel: () => void;
 }
 
@@ -16,6 +16,17 @@ export default function TargetModal({
 }: TargetModalProps) {
   const [target, setTarget] = useState("");
 
+  // Initialize option values from defaults
+  const [optionValues, setOptionValues] = useState<Record<string, string>>(
+    () => {
+      const defaults: Record<string, string> = {};
+      script.options?.forEach((opt) => {
+        defaults[opt.id] = opt.default;
+      });
+      return defaults;
+    }
+  );
+
   const riskColors = {
     low: { text: "#00ff88", label: "Risque faible" },
     medium: { text: "#ffaa00", label: "Risque moyen" },
@@ -23,6 +34,12 @@ export default function TargetModal({
   };
 
   const risk = riskColors[script.risk];
+
+  const handleConfirm = () => {
+    if (!target.trim()) return;
+    const opts = script.options ? optionValues : undefined;
+    onConfirm(target.trim(), opts);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -64,28 +81,78 @@ export default function TargetModal({
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5">
-          <label
-            htmlFor="target-input"
-            className="block text-xs font-medium text-[var(--text-secondary)] mb-2 uppercase tracking-wider"
-          >
-            Cible
-          </label>
-          <input
-            id="target-input"
-            type="text"
-            placeholder="ex: 192.168.1.0/24, example.com, ..."
-            value={target}
-            onChange={(e) => setTarget(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && target.trim()) onConfirm(target.trim());
-            }}
-            autoFocus
-            className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] font-mono focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30 transition-all"
-          />
+        <div className="px-6 py-5 space-y-4">
+          {/* Target input */}
+          <div>
+            <label
+              htmlFor="target-input"
+              className="block text-xs font-medium text-[var(--text-secondary)] mb-2 uppercase tracking-wider"
+            >
+              Cible
+            </label>
+            <input
+              id="target-input"
+              type="text"
+              placeholder="ex: 192.168.1.0/24, example.com, ..."
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && target.trim()) handleConfirm();
+              }}
+              autoFocus
+              className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] font-mono focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30 transition-all"
+            />
+          </div>
+
+          {/* Script options (dropdowns) */}
+          {script.options?.map((opt) => (
+            <div key={opt.id}>
+              <label
+                htmlFor={`option-${opt.id}`}
+                className="block text-xs font-medium text-[var(--text-secondary)] mb-2 uppercase tracking-wider"
+              >
+                {opt.label}
+              </label>
+              <div className="relative">
+                <select
+                  id={`option-${opt.id}`}
+                  value={optionValues[opt.id] ?? opt.default}
+                  onChange={(e) =>
+                    setOptionValues((prev) => ({
+                      ...prev,
+                      [opt.id]: e.target.value,
+                    }))
+                  }
+                  className="w-full appearance-none bg-[var(--surface-2)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] font-mono focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30 transition-all cursor-pointer"
+                >
+                  {opt.choices.map((choice) => (
+                    <option key={choice.value} value={choice.value}>
+                      {choice.label}
+                    </option>
+                  ))}
+                </select>
+                {/* Dropdown arrow */}
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                  <svg
+                    className="w-4 h-4 text-[var(--text-muted)]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          ))}
 
           {script.risk === "high" && (
-            <div className="mt-3 flex items-start gap-2 px-3 py-2.5 rounded-lg bg-[var(--danger)]/10 border border-[var(--danger)]/20">
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-[var(--danger)]/10 border border-[var(--danger)]/20">
               <span className="text-xs mt-0.5">⚠️</span>
               <p className="text-[11px] text-[var(--danger)] leading-snug">
                 Ce script est classé à risque élevé. Assurez-vous d&apos;avoir
@@ -106,7 +173,7 @@ export default function TargetModal({
           </button>
           <button
             id="modal-confirm-btn"
-            onClick={() => target.trim() && onConfirm(target.trim())}
+            onClick={handleConfirm}
             disabled={!target.trim()}
             className={`flex-1 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all cursor-pointer ${
               target.trim()

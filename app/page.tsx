@@ -30,13 +30,14 @@ export default function Home() {
   }, []);
 
   const handleConfirmLaunch = useCallback(
-    (target: string) => {
+    (target: string, options?: Record<string, string>) => {
       if (!selectedScript) return;
 
       const scan: ScanResult = {
         id: `scan-${Date.now()}`,
         script: selectedScript,
         target,
+        scriptOptions: options,
         startTime: new Date(),
         status: "running",
         progress: 0,
