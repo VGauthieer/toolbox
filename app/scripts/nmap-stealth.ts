@@ -7,6 +7,7 @@ const nmapStealth: Script = {
   category: "Reconnaissance",
   risk: "medium",
   icon: "👻",
+  command: (target: string) => `nmap -sS -T4 ${target}`,
 };
 
 export default nmapStealth;
