@@ -7,6 +7,7 @@ const hashCrack: Script = {
   category: "Mots de passe",
   risk: "medium",
   icon: "🔑",
+  command: (target: string) => `hashcat -m 0 ${target}`,
 };
 
 export default hashCrack;
