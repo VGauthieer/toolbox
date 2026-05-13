@@ -1,9 +1,9 @@
-FROM node:20-alpine AS base
+FROM node:20-slim AS base
 
 # Installer les dépendances système (outils de sécurité)
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     python3 \
-    py3-pip \
+    python3-pip \
     nmap \
     nikto \
     hydra \
@@ -18,7 +18,7 @@ RUN apk add --no-cache \
 RUN pip3 install shodan --break-system-packages
 
 # Installer hashcat
-RUN apk add --no-cache hashcat
+RUN apt-get install hashcat
 
 # Dossier de travail
 WORKDIR /app
