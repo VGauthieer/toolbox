@@ -7,6 +7,7 @@ const xssScanner: Script = {
   category: "Vulnérabilités",
   risk: "high",
   icon: "⚡",
+  command: (target: string) => `dalfox url ${target}`
 };
 
 export default xssScanner;

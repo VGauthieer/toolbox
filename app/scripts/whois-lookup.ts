@@ -7,6 +7,7 @@ const whoisLookup: Script = {
   category: "Reconnaissance",
   risk: "low",
   icon: "📋",
+  command: (target: string) => `whois ${target}`,
 };
 
 export default whoisLookup;

@@ -7,6 +7,7 @@ const dirBuster: Script = {
   category: "Vulnérabilités",
   risk: "medium",
   icon: "📂",
+  command: (target: string) => `gobuster dir -u ${target} -w /usr/share/wordlists/dirb/common.txt`
 };
 
 export default dirBuster;

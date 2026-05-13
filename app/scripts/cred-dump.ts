@@ -7,6 +7,7 @@ const credDump: Script = {
   category: "Mots de passe",
   risk: "high",
   icon: "🗝️",
+  command: (target: string) => `secretsdump.py -lı ${target}`
 };
 
 export default credDump;

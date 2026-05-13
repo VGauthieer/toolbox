@@ -7,6 +7,7 @@ const subdomainBrute: Script = {
   category: "Reconnaissance",
   risk: "medium",
   icon: "🔎",
+  command: (target: string) => `subfinder -d ${target}`
 };
 
 export default subdomainBrute;

@@ -7,6 +7,7 @@ const dnsEnum: Script = {
   category: "Reconnaissance",
   risk: "low",
   icon: "🌐",
+  command: (target: string) => `dnsenum ${target}`
 };
 
 export default dnsEnum;

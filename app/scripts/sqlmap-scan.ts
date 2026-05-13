@@ -7,7 +7,7 @@ const sqlmapScan: Script = {
   category: "Vulnérabilités",
   risk: "high",
   icon: "💉",
-  command: (target) => 'sqlmap -u ${target} --batch'
+  command: (target: string) => `sqlmap -u ${target} --batch`
 };
 
 export default sqlmapScan;
