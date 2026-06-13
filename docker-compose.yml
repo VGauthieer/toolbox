@@ -1,12 +1,62 @@
 version: "3.9"
 
+# ─────────────────────────────────────────────────────────────────────────────
+# docker-compose.yml — Pentest Toolbox
+# Compatible : linux/amd64 · linux/arm64 (Pi 4/5) · linux/arm/v7 (Pi 3)
+# ─────────────────────────────────────────────────────────────────────────────
+
 services:
-  himalia:
-    build: .
+  toolbox:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        REPORT_SECRET_HEX: ""
+
+    image: toolbox:latest
+    container_name: pentest-toolbox
+
     volumes:
       - ./scripts:/app/scripts
-      - ./reports:/data/reports
+      - reports:/data/reports
+
+    cap_drop:
+      - ALL
     cap_add:
       - NET_ADMIN
       - NET_RAW
+
     network_mode: host
+
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,noexec
+
+    security_opt:
+      - no-new-privileges:true
+
+    restart: unless-stopped
+
+    # GPU pour hashcat (optionnel) — décommente selon ton hardware :
+
+    # NVIDIA (amd64 / arm64) :
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+    # AMD / Intel via DRI (amd64 / arm64) :
+    # devices:
+    #   - /dev/dri:/dev/dri
+
+    # [CORRECTION 4] `platform` décommenté selon ton architecture cible :
+    # platform: linux/amd64
+    # platform: linux/arm64
+    # platform: linux/arm/v7
+
+volumes:
+  reports:
+    driver: local
