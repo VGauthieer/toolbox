@@ -145,6 +145,13 @@ RUN set -e; \
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# ── [10] Permissions finales — NE PAS SUPPRIMER ──────────────────────────────
+# COPY . . (étape 7) copie le dossier local data/ dans /app/data/ avec
+# l'ownership root:root, ce qui ÉCRASE le chown fait à l'étape [5].
+# Il est donc OBLIGATOIRE de rétablir les permissions ICI, après tous les COPY.
+RUN mkdir -p /app/data/reports \
+ && chown -R pentest:pentest /app/data/reports
+
 USER pentest
 
 VOLUME ["/app/data/reports"]

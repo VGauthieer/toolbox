@@ -26,8 +26,10 @@ services:
     # [FIX] Le secret est lu depuis .env (généré par setup-secret.sh)
     # et injecté dans l'environnement du conteneur. entrypoint.sh lui
     # donne la priorité sur le secret baked-in au build.
+    # required: false → pas d'erreur si .env n'existe pas encore.
     env_file:
-      - .env
+      - path: .env
+        required: false
 
     volumes:
       - ./scripts:/app/scripts
