@@ -23,11 +23,17 @@ FROM node:20-slim AS base
 # rm -rf /var/lib/apt/lists/* : supprime le cache apt du layer (~30-50 Mo gagnés)
 # libcap2-bin : fournit setcap, nécessaire pour les capabilities sur les binaires
 # wireshark-common : fournit dumpcap (requis par tshark pour la capture)
+# git : nécessaire pour installer nikto depuis les sources (voir [1b])
+#
+# NOTE: `nikto` est retiré de cette liste. Le paquet est absent ou instable
+# selon les versions/architectures des dépôts Debian Bookworm — il est
+# installé depuis les sources officielles ci-dessous (script Perl pur,
+# fonctionne sur toutes architectures sans compilation).
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
+    perl \
     nmap \
-    nikto \
     hydra \
     sqlmap \
     tshark \
@@ -35,10 +41,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     arpwatch \
     arp-scan \
     curl \
+    git \
+    ca-certificates \
     bash \
     openssl \
     libcap2-bin \
  && rm -rf /var/lib/apt/lists/*
+
+# ── [1b] Nikto — installation depuis les sources (GitHub) ────────────────────
+# nikto est un ensemble de scripts Perl, donc pas de compilation et
+# fonctionne identiquement sur amd64 / arm64 / arm/v7.
+# On clone le repo officiel et on expose nikto.pl via un wrapper dans le PATH.
+RUN git clone --depth 1 https://github.com/sullo/nikto.git /opt/nikto \
+ && chmod +x /opt/nikto/program/nikto.pl \
+ && printf '#!/bin/sh\nexec perl /opt/nikto/program/nikto.pl "$@"\n' > /usr/local/bin/nikto \
+ && chmod +x /usr/local/bin/nikto
 
 # ── [2] Hashcat — séparé car souvent absent sur arm/v7 ───────────────────────
 # On tente l'install et on ignore l'échec silencieusement sur les archs
