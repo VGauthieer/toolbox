@@ -141,6 +141,11 @@ RUN set -e; \
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# ── [10] Permissions finales sur le dossier reports ──────────────────────────
+# COPY . . (étape 7) écrase /app/data avec root:root → on rétablit ici
+RUN mkdir -p /app/data/reports \
+ && chown -R pentest:pentest /app/data/reports
+
 USER pentest
 
 VOLUME ["/app/data/reports"]
