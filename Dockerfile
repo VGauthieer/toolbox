@@ -76,10 +76,18 @@ RUN pip3 install shodan --break-system-packages
 # cap_net_admin : manipulation d'interfaces réseau
 #
 # tshark délègue la capture paquet à dumpcap ; c'est donc dumpcap qu'on équipe.
-# L'utilisateur doit aussi appartenir au groupe wireshark pour y accéder.
-RUN setcap cap_net_raw+ep            /usr/bin/nmap      \
+#
+# Le groupe `wireshark` n'est PAS créé automatiquement par wireshark-common
+# en install non-interactive (la question debconf "non-root capture" est
+# sautée). On le crée nous-mêmes, puis on restreint dumpcap à ce groupe
+# (chgrp + chmod 750) : seul un membre du groupe peut l'exécuter, en plus
+# des capabilities qui l'autorisent à ouvrir des raw sockets.
+RUN groupadd --system wireshark \
+ && setcap cap_net_raw+ep            /usr/bin/nmap      \
  && setcap cap_net_raw+ep            /usr/sbin/arp-scan  \
  && setcap cap_net_raw,cap_net_admin+ep /usr/bin/dumpcap \
+ && chgrp wireshark /usr/bin/dumpcap \
+ && chmod 750 /usr/bin/dumpcap \
  # arpwatch : le binaire peut varier selon l'arch, on cherche sa localisation
  && ARPWATCH_BIN=$(command -v arpwatch 2>/dev/null || true) \
  && if [ -n "$ARPWATCH_BIN" ]; then \
