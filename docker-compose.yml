@@ -18,7 +18,7 @@ services:
 
     volumes:
       - ./scripts:/app/scripts
-      - reports:/data/reports
+      - reports:/app/data/reports
 
     cap_drop:
       - ALL

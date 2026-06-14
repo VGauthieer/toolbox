@@ -100,8 +100,8 @@ RUN groupadd --system wireshark \
 RUN groupadd --system pentest \
  && useradd --system --gid pentest --no-create-home pentest \
  && usermod -aG wireshark pentest \
- && mkdir -p /app/reports \
- && chown -R pentest:pentest /app/reports
+ && mkdir -p /app/data/reports \
+ && chown -R pentest:pentest /app/data
 
 # ── [6] Dépendances Node ──────────────────────────────────────────────────────
 WORKDIR /app
@@ -143,7 +143,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 USER pentest
 
-VOLUME ["/app/reports"]
+VOLUME ["/app/data/reports"]
 
 EXPOSE 3000
 
