@@ -97,6 +97,10 @@ RUN groupadd --system wireshark \
 # ── [5] Utilisateur non-root ──────────────────────────────────────────────────
 # Syntaxe Debian (node:20-slim) : groupadd / useradd
 # Ajout au groupe wireshark pour accéder à dumpcap sans root
+#
+# [FIX] L'app écrit dans /app/data/reports (et non /app/reports) — ce chemin
+# doit être créé et chowned ici pour que l'utilisateur non-root pentest
+# puisse y écrire, et le volume Docker hérite de ces permissions.
 RUN groupadd --system pentest \
  && useradd --system --gid pentest --no-create-home pentest \
  && usermod -aG wireshark pentest \
@@ -140,11 +144,6 @@ RUN set -e; \
 # Charge /app/.env.crypto et exporte REPORT_SECRET_HEX avant de démarrer l'app
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
-
-# ── [10] Permissions finales sur le dossier reports ──────────────────────────
-# COPY . . (étape 7) écrase /app/data avec root:root → on rétablit ici
-RUN mkdir -p /app/data/reports \
- && chown -R pentest:pentest /app/data/reports
 
 USER pentest
 
