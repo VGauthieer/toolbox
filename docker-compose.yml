@@ -23,14 +23,6 @@ services:
     image: toolbox:latest
     container_name: pentest-toolbox
 
-    # [FIX] Le secret est lu depuis .env (généré par setup-secret.sh)
-    # et injecté dans l'environnement du conteneur. entrypoint.sh lui
-    # donne la priorité sur le secret baked-in au build.
-    # required: false → pas d'erreur si .env n'existe pas encore.
-    env_file:
-      - path: .env
-        required: false
-
     volumes:
       - ./scripts:/app/scripts
       # [FIX] L'app écrit dans /app/data/reports. Le Dockerfile crée et
