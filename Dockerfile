@@ -33,6 +33,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     perl \
+    libxml-writer-perl \
+    libjson-perl \
     nmap \
     hydra \
     sqlmap \
