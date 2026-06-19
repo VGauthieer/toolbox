@@ -252,7 +252,7 @@ export default function ScanStatus({
             <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
           </div>
           <span className="text-[10px] text-[var(--text-muted)] font-mono">
-            terminal — himalia
+            terminal — review
           </span>
         </div>
         <div className="flex-1 bg-[#0d0d14] rounded-lg border border-[var(--border)] overflow-hidden scan-line-effect">

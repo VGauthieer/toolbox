@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Himalia — Offensive Security Toolbox",
+  title: "Review — Offensive Security Toolbox",
   description:
     "A powerful offensive security toolbox for penetration testing and security auditing.",
 };

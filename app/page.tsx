@@ -75,11 +75,11 @@ export default function Home() {
       <header className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-md z-10">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--accent)] to-[#00aa55] flex items-center justify-center shadow-lg shadow-[var(--accent)]/20">
-            <span className="text-black text-sm font-bold">H</span>
+            <span className="text-black text-sm font-bold">R</span>
           </div>
           <div>
             <h1 className="text-sm font-bold text-[var(--text-primary)] tracking-wide">
-              HIMALIA
+              REVIEW
             </h1>
             <p className="text-[10px] text-[var(--text-muted)] font-mono tracking-wider">
               OFFENSIVE SECURITY TOOLBOX

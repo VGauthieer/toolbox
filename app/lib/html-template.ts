@@ -80,7 +80,7 @@ export function generateHtmlReport(report: ReportData): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rapport — ${escapeHtml(report.scriptName)} | Himalia</title>
+  <title>Rapport — ${escapeHtml(report.scriptName)} | Review</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -308,9 +308,9 @@ export function generateHtmlReport(report: ReportData): string {
 <body>
   <div class="header">
     <div class="header-top">
-      <div class="logo">H</div>
+      <div class="logo">R</div>
       <div>
-        <div class="brand">HIMALIA</div>
+        <div class="brand">REVIEW</div>
         <div class="brand-sub">OFFENSIVE SECURITY TOOLBOX</div>
       </div>
     </div>
@@ -374,7 +374,7 @@ export function generateHtmlReport(report: ReportData): string {
           <span class="terminal-dot" style="background:#ff5f56"></span>
           <span class="terminal-dot" style="background:#ffbd2e"></span>
           <span class="terminal-dot" style="background:#27c93f"></span>
-          <span style="font-size:11px;color:#555570;font-family:monospace;margin-left:8px">terminal — himalia</span>
+          <span style="font-size:11px;color:#555570;font-family:monospace;margin-left:8px">terminal — review</span>
         </div>
         <div class="terminal-body">
           ${report.logs
@@ -396,7 +396,7 @@ export function generateHtmlReport(report: ReportData): string {
   </div>
 
   <div class="footer">
-    Rapport généré par Himalia — ${new Date().toLocaleString("fr-FR")} — ID: ${report.id}
+    Rapport généré par Review — ${new Date().toLocaleString("fr-FR")} — ID: ${report.id}
   </div>
 </body>
 </html>`;
