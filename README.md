@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Review — Offensive Security Toolbox
 
-## Getting Started
+Interface web pour lancer et superviser des outils de pentest depuis un navigateur. L'app tourne dans un container Docker qui embarque nmap, nikto, sqlmap, hydra, tshark, arp-scan et d'autres. Les scans streament leurs logs en temps réel et génèrent des rapports HTML exportables.
 
-First, run the development server:
+## Outils disponibles
+
+| Catégorie | Outils |
+|---|---|
+| Reconnaissance | nmap (full / stealth), whois, DNS enum, subdomain brute, Shodan |
+| Vulnérabilités | Nikto, sqlmap, XSS scanner, DirBuster |
+| Réseau | ARP scan, sniff trafic, détection MITM |
+| Mots de passe | Hydra, hashcat, credential dump |
+
+## Prérequis
+
+- Docker ≥ 24
+- Docker Compose v2 (`docker compose`)
+- Git (pour l'auto-update)
+
+---
+
+## Démarrage rapide
+
+### 1. Cloner le repo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone git@github.com:VGauthieer/toolbox.git
+cd toolbox
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Générer le secret de chiffrement des rapports
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Le secret est généré **une seule fois** et persisté dans `.env`. Il protège les rapports `.enc` entre les rebuilds.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+echo "REPORT_SECRET_HEX=$(openssl rand -hex 32)" > .env
+```
 
-## Learn More
+### 3. Builder et lancer
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+docker compose up -d --build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+L'app est accessible sur **http://localhost:3000**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Commandes utiles
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Voir les logs de l'app
+docker compose logs -f
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Rebuilder sans cache (après modification du code)
+docker compose build --no-cache && docker compose up -d
+
+# Arrêter
+docker compose down
+
+# Arrêter et supprimer les volumes (rapports inclus)
+docker compose down -v
+```
+
+---
+
+## Auto-update
+
+Mise à jour automatique depuis GitHub via cron. À configurer **une seule fois** sur le serveur.
+
+### Étape 1 — Deploy key SSH
+
+Génère une clé SSH dédiée et configure `~/.ssh/config` pour GitHub :
+
+```bash
+chmod +x setup-deploy-key.sh && ./setup-deploy-key.sh
+```
+
+Le script affiche la clé publique à coller dans **GitHub → Repo → Settings → Deploy Keys**.
+
+### Étape 2 — Cron job quotidien
+
+Installe un cron job qui vérifie les mises à jour chaque jour à 4h :
+
+```bash
+chmod +x setup-cron.sh && ./setup-cron.sh
+```
+
+Logs disponibles dans `/var/log/review-update.log`.
+
+### Étape 3 — Mise à jour manuelle depuis l'UI
+
+Depuis l'interface, le bouton **UPDATE** dans la barre du haut ouvre un terminal qui exécute `auto-update.sh` et streame les logs en direct.
+
+---
+
+## Build multi-architecture (amd64 / arm64 / arm/v7)
+
+```bash
+docker buildx build \
+  --platform linux/amd64,linux/arm64,linux/arm/v7 \
+  -t review-toolbox --push .
+```
+
+---
+
+## Structure
+
+```
+.
+├── app/
+│   ├── api/
+│   │   ├── run/          # Stream d'exécution des scans
+│   │   ├── update/       # Endpoint auto-update
+│   │   └── reports/      # CRUD rapports JSON + HTML
+│   ├── components/       # ScriptPanel, ScanStatus, ScanHistory, UpdateModal…
+│   ├── scripts/          # Définitions des outils (commande, options, risque)
+│   └── lib/              # Génération HTML, stockage
+├── data/reports/         # Rapports persistés (volume Docker)
+├── Dockerfile
+├── docker-compose.yml
+├── auto-update.sh
+├── setup-deploy-key.sh
+└── setup-cron.sh
+```
